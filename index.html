@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    \<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
     <style>
       *{
         margin: 0px;
@@ -16,17 +17,33 @@
 
         top:0;
         left:0;
-
-        width: 100%;
+        display: inline-block;
+        width: 80%;
         height: 100%;
+      }
+      .inf{
+        display: inline-block;
+        position: fixed;
+        width: 20%;
+        height: 100%;
+        right: 0px;
+        top: 0px;
+  
       }
     </style>
   </head>
   <body>
 
-    <div id="map"></div>
+    
+    <div>
+      <div id="map"></div>
+
+      <div class="inf">
+        <canvas id="myChart" width="280px" height="450px"></canvas>
+      </div>
+     
+    </div>
 
     <script src="js.js"></script>
-
   </body>
 </html>
