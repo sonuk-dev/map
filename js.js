@@ -1,13 +1,3 @@
-var map = L.map('map').setView({lon: 0, lat: 0}, 2);
-      
-   
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-    }).addTo(map);
-
-L.control.scale().addTo(map);
-
 let a = [{ "lat": 41.500850, "lon": 2.110628, "name": "srm.pic.es", "version": "5.2.16", "size": "10256817", "used":  "8302563", "desc": "Tier 1: PIC site", "loc": "Bellaterra, Spain", "url": "http://www.pic.es" },
 { "lat": 55.550000, "lon": 37.370000, "name": "se3.itep.ru", "version": "5.2.11", "size": "332428", "used":  "258779", "desc": "ITEP", "loc": "Moscow, Russia", "url": "http://egee.itep.ru" },
 { "lat": 60.180000, "lon": 24.830000, "name": "bombay.csc.fi", "version": "6.0.5", "size": "440", "used":  "205", "desc": "ARC-FGCI cluster; GLUE2ServiceID=urn:ogf:ComputingService:io-grid.fgci.csc.fi:arex", "loc": "Espoo, Finland", "url": "http://www.csc.fi" },
@@ -72,8 +62,30 @@ let a = [{ "lat": 41.500850, "lon": 2.110628, "name": "srm.pic.es", "version": "
 { "lat": 51.245640, "lon": 7.149410, "name": "grid-se.physik.uni-wuppertal.de", "version": "5.2.18", "size": "2217187", "used":  "1576976", "desc": "ARC-GLUE2ServiceID=urn:ogf:ComputingService:arc-ce.pleiades.uni-wuppertal.de:arex", "loc": "Wuppertal, Germany", "url": "http://www.pleiades.uni-wuppertal.de/" },
 ];
 
+var map = L.map('map').setView({lon: 0, lat: 30}, 3);
+      
+   
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    
+    noWrap: true,
+    maxZoom: 19,
+    minZoom: 2,
+    attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+    }).addTo(map);
+
+var southWest = L.latLng(-89.98155760646617, -180),
+    northEast = L.latLng(89.99346179538875, 180),
+    bounds = L.latLngBounds(southWest, northEast);
+    
+map.setMaxBounds(bounds);
+
+map.on('drag', function() {
+        map.panInsideBounds(bounds, { animate: false });
+    });
+
+
 for (let i = 0; i < a.length; i++) {
     
-    L.marker({lon: a[i].lon, lat: a[i].lat}).bindPopup(`${a[i].loc}`).addTo(map);
+    L.marker({lon: a[i].lon, lat: a[i].lat}).bindPopup(`${a[i].loc} <br> ${a[i].desc}`).addTo(map);
 }
 console.log(a[0])
