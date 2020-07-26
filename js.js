@@ -63,9 +63,10 @@ let a = [
     { "lat": 51.245640, "lon": 7.149410, "name": "grid-se.physik.uni-wuppertal.de", "version": "5.2.18", "size": "2217187", "used":  "1576976", "desc": "ARC-GLUE2ServiceID=urn:ogf:ComputingService:arc-ce.pleiades.uni-wuppertal.de:arex", "loc": "Wuppertal, Germany", "url": "http://www.pleiades.uni-wuppertal.de/" },
 ];
 
-let map = L.map('map').setView({lon: 0, lat: 30}, 3),
-    layerGroup = L.layerGroup();
+// ---------------- Map
 
+let map = L.map('map').setView({lon: 0, lat: 30}, 3);
+    
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     noWrap: true,
     maxZoom: 19,
@@ -83,81 +84,219 @@ map.on('drag', function() {
         map.panInsideBounds(bounds, { animate: false });
     });
 
+let markers = {};
 
-let lab = [],
-    dat = [];
-    markers = {};
-
+// ----------------------Markers
 
 let loop = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61];
 
 loop.forEach((j) => {
-    let str = `<ul>`;
-    str += `<li>${a[j].loc}<br>${a[j].desc}<br>${a[j].version}</li>`
+    let str = ``;
+    str += `${a[j].loc}<br>${a[j].desc}<br><ul><li>${a[j].version}</li>`
   
     for (let index = j + 1 ; index < a.length; index++) {
         if (a[j].lon === a[index].lon && a[j].lat === a[index].lat && a[j] !==a[index]) {
-            str += `<li>${a[index].loc}<br>${a[index].desc}<br>${a[index].version}</li>`;
+            str += `<li>${a[index].version}</li>`;
             loop.splice(loop.indexOf(index), 1)
         }
     }
-    markers[`${a[j].lat}, ${a[j].lon}`] = L.marker({lon: a[j].lon, lat: a[j].lat}).bindPopup(str).addTo(layerGroup);
+    markers[`${a[j].lat}, ${a[j].lon}`] = L.marker({lon: a[j].lon, lat: a[j].lat}).bindPopup(str).addTo(map);
 });
 
-layerGroup.addTo(map)
 
+
+// Data for Chart
+let b = {
+    name:'',
+    children: [],
+}
 
 for (let i = 0; i < a.length; i++) {
-
-    let j;
-    if ( lab.some((item, index) => {j = index; return item === a[i].version}) ) {
-        dat[j]++;
-
+    
+    let j, m ;
+    if ( b.children.some((item, index) => {j = index; return item.name === a[i].version.substring(0, a[i].version.lastIndexOf('.'))}) ) {
+        if ( b.children[j].children.some((item, index) => {m = index; return item.name === a[i].version }) ){
+           b.children[j].children[m].size ++;
+        } else {
+            b.children[j].children.push({name: a[i].version, size: 1})
+        }
     } else {
-        lab.push(a[i].version);
-        dat.push(1);
+        b.children.push({name: a[i].version.substring(0, a[i].version.lastIndexOf('.')), children: [{name:a[i].version, size: 1}]})
     }
+    
+}
+// ------------------------Chart
+const format = d3.format(",d");
+const width = 400;
+const radius = width / 6;
+
+const arc = d3.arc()
+        .startAngle(d => d.x0)
+        .endAngle(d => d.x1)
+        .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
+        .padRadius(radius * 1.5)
+        .innerRadius(d => d.y0 * radius)
+        .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
+
+const partition = data => {
+    const root = d3.hierarchy(data)
+            .sum(d => d.size)
+            .sort((a, b) => b.value - a.value);
+    return d3.partition()
+            .size([2 * Math.PI, root.height + 1])
+            (root);
 }
 
-var ctx = document.getElementById('myChart').getContext('2d');
 
-var myChart = new Chart(ctx, {
+let data = b
  
-    type: 'pie',
-    data: {
-      labels: lab,
-      datasets: [
-        {
-          backgroundColor: ["#704343","#804d4d","#8f5656","#9f6060","#a97070","#b38080","#bc8f8f", "#bc8f9b","#bc8fa6","#bc8fb1","#bc8fbc","#b18fbc","#a68fbc","#9b8fbc","#8f8fbc","#8f9bbc","#8fa6bc","#8fb1bc","#8fbcbc","#8fbcb1","#8fbca6","#8fbc9b","#8fbc8f","#9bbc8f","#a6bc8f","#b1bc8f","#bcbc8f","#bcb18f","#bca68f","#bc9b8f","#bc8f8f"],
-          data: dat,
-        }
-      ]
-    },
-    options: {
-        title: {
-          display: true,
-          text: 'Versions',
-          fontSize: 40,
-        },
-        onClick: funk,
-    }
-});
+const root = partition(data);
+const color = d3.scaleOrdinal().range(d3.quantize(d3.interpolateRainbow  , data.children.length + 1));
 
-function funk(evt, item) {
-    if (item[0]) {
-        map.eachLayer(function(layer) {
-           if (layer._latlng) map.removeLayer(layer);
+root.each(d => d.current = d);
+
+const svg = d3.select('#partitionSVG')
+        .style("width", width + 'px')
+        .style("height", "auto")
+        .style("font", "14px sans-serif");
+
+const g = svg.append("g")
+            .attr("transform", `translate(${width / 2},${width / 2})`);
+
+const path = g.append("g")
+            .selectAll("path")
+            .data(root.descendants().slice(1))
+            .join("path")
+            .attr("fill", d => {
+                while (d.depth > 1)
+                    d = d.parent;
+                return color(d.data.name);
+            })
+            .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.6 : 0.4) : 0)
+            .attr("d", d => arc(d.current));
+
+path.filter(d => d.children)
+            .style("cursor", "pointer")
+            .on("click", clicked);
+
+path.append("title")
+            .text(d => `${d.ancestors().map(d => d.data.name).reverse().join("/")}\n${format(d.value)}`);
+
+const label = g.append("g")
+            .attr("pointer-events", "none")
+            .attr("text-anchor", "middle")
+            .style("user-select", "none")
+            .selectAll("text")
+            .data(root.descendants().slice(1))
+            .join("text")
+            .attr("dy", "0.35em")
+            .attr("fill-opacity", d => +labelVisible(d.current))
+            .attr("transform", d => labelTransform(d.current))
+            .text(d => d.data.name);
+
+const parent = g.append("circle")
+            .datum(root)
+            .attr("r", radius)
+            .attr("fill", "none")
+            .attr("pointer-events", "all")
+            .on('click', function (p) {
+                clicked(p)
+                showAllMarkers()
+            });
+           
+
+function clicked(p) {
+    parent.datum(p.parent || root);
+
+    root.each(d => d.target = {
+                x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+                x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
+                y0: Math.max(0, d.y0 - p.depth),
+                y1: Math.max(0, d.y1 - p.depth)
         });
-       
-       
-        let j = 0;
-        for (let i = 0; i < a.length; i++) {
 
-            if (a[i].version === item[0]._model.label) {
-                markers[`${a[i].lat}, ${a[i].lon}`].addTo(map)
-                j++;
-            }
-            if (j === dat[lab.indexOf(item[0]._model.label)]) break;
+    const t = g.transition().duration(750);
+
+        // Transition the data on all arcs, even the ones that aren’t visible,
+        // so that if this transition is interrupted, entering arcs will start
+        // the next transition from the desired position.
+    path.transition(t)
+            .tween("data", d => {
+                const i = d3.interpolate(d.current, d.target);
+                return t => d.current = i(t);
+            })
+            .filter(function (d) {
+                return +this.getAttribute("fill-opacity") || arcVisible(d.target);
+            })
+            .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.6 : 0.4) : 0)
+            .attrTween("d", d => () => arc(d.current));
+
+    label.filter(function (d) {
+            return +this.getAttribute("fill-opacity") || labelVisible(d.target);
+        }).transition(t)
+            .attr("fill-opacity", d => +labelVisible(d.target))
+            .attrTween("transform", d => () => labelTransform(d.current));
+}
+
+    function arcVisible(d) {
+        return d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0;
+    }
+
+    function labelVisible(d) {
+        return d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03;
+    }
+
+    function labelTransform(d) {
+        const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
+        const y = (d.y0 + d.y1) / 2 * radius;
+        return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
+    }
+
+
+
+document.querySelector('svg').addEventListener('click', funk);
+
+function funk(e) {
+    if (e.target.children[0]) {
+       
+        if (e.target.nodeName == 'svg') {
+            showAllMarkers()
+            return;
         }
+        map.eachLayer(function(layer) {
+            if (layer._latlng) map.removeLayer(layer);
+        });
+        let title = e.target.children[0].innerHTML,
+            version;
+        if (title.length > 7) {
+            version = title.slice(title.lastIndexOf('/') + 1, title.indexOf('/n') - 1)
+        } else {
+            version = title.slice(title.lastIndexOf('/') + 1, title.indexOf('/n') - 2)
+        }
+           
+        let markArray = [];
+                  
+        for (let i = 0; i < a.length; i++) {
+        
+            if ( a[i].version.startsWith(version) ) {
+        
+                markers[`${a[i].lat}, ${a[i].lon}`].addTo(map);
+                markArray[i] = {lat: a[i].lat, lon: a[i].lon}
+            }
+        } 
+    
+        map.fitBounds(markArray);
     }
 }
+
+function showAllMarkers() {
+    let mark = [];
+    for (let i = 0; i < a.length; i++) {
+        
+        markers[`${a[i].lat}, ${a[i].lon}`].addTo(map);
+        mark[i] = {lat: a[i].lat, lon: a[i].lon}
+    } 
+
+    map.fitBounds(mark);
+}
+
