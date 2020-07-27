@@ -92,11 +92,11 @@ let loop = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
 
 loop.forEach((j) => {
     let str = ``;
-    str += `${a[j].loc}<br>${a[j].desc}<br><ul><li>${a[j].version}</li>`
+    str += `${a[j].loc}<br>${a[j].desc}<br><ul><li>Version: ${a[j].version}<br>Name: ${a[j].name}<br>Size: ${bytesToSize(a[j].size)}</li>`
   
     for (let index = j + 1 ; index < a.length; index++) {
         if (a[j].lon === a[index].lon && a[j].lat === a[index].lat && a[j] !==a[index]) {
-            str += `<li>${a[index].version}</li>`;
+            str += `<li>Version: ${a[index].version}<br>Name: ${a[index].name}<br>Size: ${bytesToSize(a[index].size)}</li>`;
             loop.splice(loop.indexOf(index), 1)
         }
     }
@@ -252,9 +252,9 @@ function clicked(p) {
         return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
     }
 
-
-
 document.querySelector('svg').addEventListener('click', funk);
+
+let p = document.querySelector('#text');
 
 function funk(e) {
     if (e.target.children[0]) {
@@ -266,26 +266,25 @@ function funk(e) {
         map.eachLayer(function(layer) {
             if (layer._latlng) map.removeLayer(layer);
         });
+      
         let title = e.target.children[0].innerHTML,
-            version;
-        if (title.length > 7) {
-            version = title.slice(title.lastIndexOf('/') + 1, title.indexOf('/n') - 1)
-        } else {
-            version = title.slice(title.lastIndexOf('/') + 1, title.indexOf('/n') - 2)
-        }
-           
-        let markArray = [];
-                  
+            version = title.slice(title.lastIndexOf('/') + 1, title.search(/\n/) ),
+            markArray = [],
+            numberOf = 0,
+            ul = `<ul>`  ;   
+               
         for (let i = 0; i < a.length; i++) {
         
             if ( a[i].version.startsWith(version) ) {
         
                 markers[`${a[i].lat}, ${a[i].lon}`].addTo(map);
-                markArray[i] = {lat: a[i].lat, lon: a[i].lon}
+                markArray[i] = {lat: a[i].lat, lon: a[i].lon};
+                numberOf ++;
+                ul += `<li>${a[i].loc} ${a[i].desc} <ul>Version: ${a[i].version}<br>Name: ${a[i].name}<br>Size: ${bytesToSize(a[i].size)}<br>Used: ${bytesToSize(a[i].used)}<br>Available: ${bytesToSize(a[i].size -a[i].used)}</ul></li>`
             }
         } 
-    
         map.fitBounds(markArray);
+        p.innerHTML = `Version: ${version}<br>Number of: ${numberOf}` + ul
     }
 }
 
@@ -298,5 +297,17 @@ function showAllMarkers() {
     } 
 
     map.fitBounds(mark);
+    p.innerHTML = ``
 }
+
+function bytesToSize(bytes) {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    if (bytes === 0) return 'n/a'
+    const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10)
+    if (i === 0) return `${bytes} ${sizes[i]}`
+    return `${(bytes / (1024 ** i)).toFixed(2)} ${sizes[i]}`
+}
+
+
+
 
