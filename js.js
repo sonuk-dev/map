@@ -92,11 +92,11 @@ let loop = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
 
 loop.forEach((j) => {
     let str = ``;
-    str += `<strong>${a[j].loc}</strong><br>${a[j].desc}<br><ul><li><strong>Version</strong>: ${a[j].version}<br><strong>Name:</strong> ${a[j].name}<br><strong>Size:</strong> ${bytesToSize(a[j].size)}</li>`
+    str += `<strong>${a[j].loc}</strong><br>${a[j].desc}<br><ul><li><strong>Version</strong>: ${a[j].version}<br><strong>Name:</strong> ${a[j].name}<br><strong>Size:</strong> ${mbytesToSize(a[j].size)}</li>`
   
     for (let index = j + 1 ; index < a.length; index++) {
         if (a[j].lon === a[index].lon && a[j].lat === a[index].lat && a[j] !==a[index]) {
-            str += `<li><strong>Version</strong>: ${a[index].version}<br><strong>Name:</strong> ${a[index].name}<br><strong>Size:</strong> ${bytesToSize(a[index].size)}</li>`;
+            str += `<li><strong>Version</strong>: ${a[index].version}<br><strong>Name:</strong> ${a[index].name}<br><strong>Size:</strong> ${mbytesToSize(a[index].size)}</li>`;
             loop.splice(loop.indexOf(index), 1)
         }
     }
@@ -292,6 +292,10 @@ function showAllMarkers() {
 }
 
 
+function mbytesToSize(bytes) {
+    return bytesToSize(bytes*Math.pow(1000, 3));
+}
+
 function bytesToSize(bytes) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
     if (bytes === 0) return 'n/a'
@@ -310,9 +314,9 @@ avsiz = size - used ;
 
 
 document.querySelector('[data-title="total"]').textContent = a.length;
-let us = document.querySelector('[data-title="used"]').textContent = bytesToSize(used);
-document.querySelector('[data-title="availablesize"]').textContent = bytesToSize(avsiz);
-document.querySelector('[data-title="size"]').textContent =bytesToSize(size);
+let us = document.querySelector('[data-title="used"]').textContent = mbytesToSize(used);
+document.querySelector('[data-title="availablesize"]').textContent = mbytesToSize(avsiz);
+document.querySelector('[data-title="size"]').textContent =mbytesToSize(size);
 
 
 
