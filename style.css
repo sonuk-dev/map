@@ -1,4 +1,4 @@
-*{
+/* *{
     margin: 0px;
 }
 
@@ -9,16 +9,11 @@ body{
     font-weight: 400;
     color: #3b3b3b;
 }
-
-
-
-/*
 svg{
     position: absolute;
     right: 5px;
     top: 20px;
 }
-
 .wrapper{
     text-align: left;
     margin: 0 auto;
@@ -79,10 +74,20 @@ svg{
     font-size: 15px;
 } */
 
+*{
+    margin: 0px;
+}
+
+body{
+    font-family: 'Helvetica Neue', Helvetica, Arial;
+    font-size: 17px;
+    line-height: 20px;
+    font-weight: 400;
+    color: #3b3b3b;
+}
 svg{
     margin-top: 20px;
 }
-
 .wrapper{
     text-align: left;
     margin: 0 auto;
@@ -132,8 +137,20 @@ svg{
     text-align: center;
     font-family: Arial, Helvetica, sans-serif;
     box-shadow:  0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    
+    transition: height 1s;
+   
 }
+
+.oo{
+    transition: height 1s; 
+    height: 50px;
+
+}
+
+/* .inf:hover svg, .wrapper{
+    display: none;
+    
+}  */
 
 #text{
     text-align: left;
@@ -144,7 +161,7 @@ svg{
     font-size: 15px;
 }
 
-.bot{
+/* .bot{
     position:absolute;
     width: 30px;
     height: 30px;
@@ -160,11 +177,18 @@ svg{
     font-weight: 400;
     color: #3b3b3b;
     background-color: #fff
+} */
+i {
+    margin-top: 10px;
+    width: 23px;
+
 }
 
-@media only screen and (max-width:1000px){
+@media only screen and (max-width:800px){
     .inf{
-        display: none;
+        /* display: none; */
+        /* font-size: 25px; */
+        width: 100%;
     }
-    .bot{display: block;}
+    /* .bot{display: block;} */
 }

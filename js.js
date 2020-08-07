@@ -220,9 +220,7 @@ function glob(a) {
     // Onclick function for the chart
     function funk(e) {
         if (e.target.children[0]) {
-            
             if (e.target.nodeName == 'svg') {
-                showAllMarkers()
                 return;
             }
             map.eachLayer(function(layer) {
@@ -296,13 +294,17 @@ function glob(a) {
     
     let x = window.matchMedia("(max-width: 1000px)");
     let y = window.matchMedia("(max-width: 500px)");
-
+    let z = window.matchMedia("(max-width: 800px)")
     screen1000(x) 
     x.addListener(screen1000);
 
     screen500(y);
     y.addListener(screen500)
+    let inf = document.querySelector('.inf');
+    screen800(z);
+    z.addListener(screen800)
 
+    
     function screen500(y) {
         if (y.matches) { 
             map.setMinZoom(1)
@@ -312,17 +314,37 @@ function glob(a) {
         }
     }
 
-    let bot = document.querySelector('.bot');
-    let inf = document.querySelector('.inf');
 
-    bot.onclick = function() {
-
-        if (getComputedStyle(inf).display =='none') {
-            inf.style.display = 'block';
+    function screen800(z) {
+        if (z.matches) { 
+           inf.addEventListener('click', close)
         } else {
-            inf.style.display = 'none';
+            inf.removeEventListener('click', close)
         }
     }
+
+
+    function close(e) {
+
+        if (inf.classList.contains('oo')) {
+            inf.classList.remove('oo');
+            var i = inf.querySelector('i');
+            i.remove()
+            setTimeout(function () {
+                document.querySelector('.wrapper').style.display = 'block';
+                document.querySelector('svg').style.display = 'inline-block';
+                
+            }, 800)
+        } else {
+            setTimeout(function () {
+                inf.classList.add('oo')
+                document.querySelector('.wrapper').style.display = 'none';
+                document.querySelector('svg').style.display = 'none';
+                inf.insertAdjacentHTML("afterbegin", '<i class="fa fa-pie-chart"></i>');    
+            }, 800)
+        }
+    }
+
 
 }
 
