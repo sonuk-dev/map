@@ -220,7 +220,7 @@ function glob(a) {
     // Onclick function for the chart
     function funk(e) {
         if (e.target.children[0]) {
-        
+            
             if (e.target.nodeName == 'svg') {
                 showAllMarkers()
                 return;
