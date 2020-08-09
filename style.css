@@ -83,7 +83,6 @@ body{
     font-size: 17px;
     line-height: 20px;
     font-weight: 400;
-    color: #3b3b3b;
 }
 svg{
     margin-top: 20px;
@@ -105,7 +104,7 @@ svg{
 
 .row{
     display: table-row;
-    background: #ffcb9b;
+    background: #4ba3fbad;
 }
 
 .cell{
@@ -137,8 +136,8 @@ svg{
     text-align: center;
     font-family: Arial, Helvetica, sans-serif;
     box-shadow:  0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    transition: height 1s;
-   
+    /* transition: height 1s; */
+    display: none;
 }
 
 .oo{
@@ -161,34 +160,33 @@ svg{
     font-size: 15px;
 }
 
-/* .bot{
+.bot{
     position:absolute;
     width: 30px;
     height: 30px;
     right: 3px;
-    display: none;
     font-size: 23px;
     text-align: center;
     line-height: 30px;
     border: 2px solid rgba(0,0,0,0.2);
-    margin-left: 10px;
+    margin-right: 10px;
     margin-top: 10px;
     border-radius: 4px;
     font-weight: 400;
     color: #3b3b3b;
     background-color: #fff
-} */
-i {
+}
+/* i {
     margin-top: 10px;
     width: 23px;
 
-}
+} */
 
-@media only screen and (max-width:800px){
+/* @media only screen and (max-width:800px){
     .inf{
-        /* display: none; */
-        /* font-size: 25px; */
-        width: 100%;
+        display: none;
+     
+
     }
-    /* .bot{display: block;} */
-}
+    .bot{display: block;}
+} */
