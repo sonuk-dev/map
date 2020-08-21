@@ -23,31 +23,28 @@ map.on('drag', function () {
 });
 
 // Request for data
-function loadJSON(path, success) {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
 
+fetch('https://gist.githubusercontent.com/kofemann/5a7e69c21ec7004128c2ca7ce3bd3a62/raw/f6726553d7c327bbacf0a0363de2f3bba0235227/dcache-map.json')
+    .then(data => {
+        data.text()
+            .then(data => {
+
+                let json;
                 try {
-                    success(JSON.parse('[' + xhr.responseText.replace(/,(?=[^,]*$)/, '') + ']'))
+                    json = JSON.parse('[' + data.replace(/,(?=[^,]*$)/, '') + ']');
                 } catch (error) {
                     console.error(error)
-                    success(JSON.parse('[' + xhr.responseText + ']'))
-
+                    let json = JSON.parse('[' + data + ']');
                 }
+                return json;
+            })
+            .then(data => {
 
-            } else {
-                console.log('error')
-            }
-        }
-    };
-
-    xhr.open('GET', path, true);
-    xhr.send();
-}
-
-loadJSON('https://gist.githubusercontent.com/kofemann/5a7e69c21ec7004128c2ca7ce3bd3a62/raw/f6726553d7c327bbacf0a0363de2f3bba0235227/dcache-map.json', glob);
+                glob(data)
+            })
+            .catch(reject => { console.error(reject) });
+    })
+    .catch(reject => { console.error(reject) });
 
 function glob(a) {
     // ----------------------Markers
@@ -115,20 +112,8 @@ function glob(a) {
     let data = b
 
     const root = partition(data);
-    // const color = d3.scaleOrdinal().range(["#003f5c", "#665191", "#a05195", "#d45087", "#f95d6a", "#ff7c43", "#FEAE65", '#64C2A6', '#2D87BB', "#2f4b7c"]);
-
-    // const color = d3.scaleOrdinal().range(['#34495e', '#9b59b6', '#3498db', '#2ecc71', '#1abc9c', '#6a888c', '#5f7174', '#a5e65a', '#00a6c0', '#32d9cb']);
-    // const color = d3.scaleOrdinal().range(['#0466C8', '#0353A4', '#023E7D', '#002855', '#001845', '#001233', '#33415C', '#5C677D', '#7D8597', '#979DAC', '#']);
-
-    // const color = d3.scaleOrdinal().range(['#143642','#B76935', '#A56336', '#935E38', '#815839', '#6F523B', '#5C4D3C', '#4A473E', '#38413F', '#263C41',  '#'])
-    // const color = d3.scaleOrdinal().range(['#2176ff', '#33a1fd', '#fdca40', '#f79824', '#f5e6e8', '#d5c6e0', '#edf060', '#f0803c', '#', '#', '#']);
-    // const color = d3.scaleOrdinal().range(['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#']);
-    // const color = d3.scaleOrdinal().range(['#21295c', '#1b3b6f', '#065a82', '#1c7293', '#9eb3c2', '#4d8b31', '#ffc800', '#ff8427', '#ffffff']);
-    // const color = d3.scaleOrdinal().range(['#064789', '#258EA6', '#3D3B8E', '#8B85C1 ', '#171738 ', '#315c2b ', '#60712f ', '#9ea93f ', '#cf5c36 ', '#eee5e9 ', '#efc88b ', '#b7cece', '#', '#']);
-    // const color = d3.scaleOrdinal().range(['#1BE7FF', '#6EEB83', '#E4FF1A', '#FFB800', '#FF5714', '#2D3047', '#A799B7', '#FF729F', '#D3C4D1', '#', '#']);
-    // fca17d da627d 9a348e 69306d 0e103d 4357ad 067bc2 01baef 00a6a6
-    // const color = d3.scaleOrdinal().range(['#b4edd2    ', '#a0cfd3',  '#8d94ba', '#5fbff9', '#9a7aa0', '#87677b', '#da627d        ','#9a348e', '#69306d',]);
-    const color = d3.scaleOrdinal().range(['#72B8FD', '#4BA3FB', '#3696FC', '#1F87FF', '#0370DD', '#0466C8', '#0259B6', '#00438F', '#023364',]);
+    const color = d3.scaleOrdinal().range(d3.quantize(d3.interpolateCividis  , data.children.length + 1));
+    // const color = d3.scaleOrdinal().range(d3.quantize(d3.interpolateBrBG  , data.children.length + 1));
 
     root.each(d => d.current = d);
 
@@ -149,7 +134,7 @@ function glob(a) {
                 d = d.parent;
             return color(d.data.name);
         })
-        .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 1 : 0.6) : 0)
+        .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.8 : 0.6) : 0)
         .attr("d", d => arc(d.current));
 
     path.filter(d => d.children)
@@ -205,7 +190,7 @@ function glob(a) {
             .filter(function (d) {
                 return +this.getAttribute("fill-opacity") || arcVisible(d.target);
             })
-            .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 1 : 0.6) : 0)
+            .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.8 : 0.6) : 0)
             .attrTween("d", d => () => arc(d.current));
 
         label.filter(function (d) {
@@ -328,37 +313,6 @@ function glob(a) {
         }
     }
 
-
-    // function screen800(z) {
-    //     if (z.matches) {
-    //         inf.addEventListener('click', close)
-    //     } else {
-    //         inf.removeEventListener('click', close)
-    //     }
-    // }
-
-
-    // function close(e) {
-
-    //     if (inf.classList.contains('oo')) {
-    //         inf.classList.remove('oo');
-    //         var i = inf.querySelector('i');
-    //         i.remove()
-    //         setTimeout(function () {
-    //             document.querySelector('.wrapper').style.display = 'block';
-    //             document.querySelector('svg').style.display = 'inline-block';
-
-    //         }, 800)
-    //     } else {
-    //         setTimeout(function () {
-    //             inf.classList.add('oo')
-    //             document.querySelector('.wrapper').style.display = 'none';
-    //             document.querySelector('svg').style.display = 'none';
-    //             inf.insertAdjacentHTML("afterbegin", '<i class="fa fa-pie-chart"></i>');
-    //         }, 800)
-    //     }
-    // }
-
     let bot = document.querySelector('.bot');
     let inf = document.querySelector('.inf');
 
@@ -370,7 +324,6 @@ function glob(a) {
             inf.style.display = 'none';
         }
     }
-
 
 }
 
